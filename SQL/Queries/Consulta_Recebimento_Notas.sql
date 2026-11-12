@@ -5,31 +5,31 @@
 -- =====================================================================
 
 SELECT 
-    rn1.Number AS numero_nota,
-    rn1.DeliveryDate AS data_entrega,
-    rn1.ValidationDate AS data_validacao,
-    rn1.NBTempBluetooth AS bluetooth,
-    rn1.Origin AS origem_mobile,
-    rn2.Temperature AS temperatura,
-    rn1.NbTempManual AS temperatura_manual,
-    rn2.TemperatureMeasurementType AS tipo_medicao_temperatura,
-    rn2.ItemPackagingString AS unidade_embalagem,
-    rn2.ItemName AS item_nome,
-    rn2.TotalPrice AS valor_total,
-    rn2.ItemGroupName AS grupo_produto,
-    rn2.ReceivedQuantity * rn2.ItemUnitStorageTypeValue AS quantidade_recebida,
-    rn2.PackingPrice / rn2.ItemUnitStorageTypeValue AS preco_unitario,
-    rn3.Name AS subgrupo_produto,
-    rn4.Name AS fornecedor,
-    rn6.Code AS codigo_filial,
-    rn8.Name AS familia_produto
-FROM dbo.ReceiptNotes AS rn1
-LEFT JOIN dbo.ReceiptNoteDetails AS rn2 ON rn1.Id = rn2.ReceiptNoteId
-LEFT JOIN dbo.ItemSubGroups AS rn3 ON rn3.Id = rn2.ItemSubGroupId	
-LEFT JOIN dbo.Suppliers AS rn4 ON rn4.Id = rn2.SupplierId
-LEFT JOIN dbo.SitePlaces AS rn5 ON rn5.Id = rn1.SitePlaceId 
-LEFT JOIN dbo.Sites AS rn6 ON rn6.Id = rn5.SiteId
-LEFT JOIN dbo.ItemGroups AS rn7 ON rn7.Id = rn2.ItemGroupId
-LEFT JOIN dbo.ItemGroupFamilies AS rn8 ON rn8.Id = rn7.ItemGroupFamilyId
-WHERE CAST(rn1.DeliveryDate AS Date) > '2025-12-31' 
-  AND rn1.IsActive = 1;
+    nf.numero_nota,
+    nf.data_entrega,
+    nf.data_validacao,
+    nf.sensor_bluetooth AS bluetooth,
+    nf.origem_mobile,
+    det_nf.temperatura_aferida AS temperatura,
+    nf.temperatura_manual,
+    det_nf.tipo_medicao_temperatura,
+    det_nf.unidade_embalagem,
+    det_nf.nome_item AS item_nome,
+    det_nf.valor_total,
+    det_nf.nome_grupo_item AS grupo_produto,
+    det_nf.quantidade_recebida * det_nf.fator_unidade_armazenamento AS quantidade_recebida,
+    det_nf.preco_embalagem / det_nf.fator_unidade_armazenamento AS preco_unitario,
+    subgrp.nome AS subgrupo_produto,
+    forn.nome AS fornecedor,
+    filial.codigo AS codigo_filial,
+    familia.nome AS familia_produto
+FROM dbo.fato_notas_recebidas AS nf
+LEFT JOIN dbo.fato_detalhes_notas_recebidas AS det_nf ON nf.id = det_nf.nota_recebida_id
+LEFT JOIN dbo.dim_subgrupos_produtos AS subgrp ON subgrp.id = det_nf.subgrupo_produto_id	
+LEFT JOIN dbo.dim_fornecedores AS forn ON forn.id = det_nf.fornecedor_id
+LEFT JOIN dbo.dim_locais_armazenagem AS local_armazenagem ON local_armazenagem.id = nf.local_armazenagem_id 
+LEFT JOIN dbo.dim_filiais AS filial ON filial.id = local_armazenagem.filial_id
+LEFT JOIN dbo.dim_grupos_produtos AS grp ON grp.id = det_nf.grupo_produto_id
+LEFT JOIN dbo.dim_familia_grupos AS familia ON familia.id = grp.familia_id
+WHERE CAST(nf.data_entrega AS Date) > '2025-12-31' 
+  AND nf.ativo = 1;

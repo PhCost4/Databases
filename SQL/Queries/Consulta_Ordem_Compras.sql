@@ -5,26 +5,26 @@
 -- =====================================================================
 
 SELECT 
-    po1.NumberString AS numero_pedido,
-    po1.DeliveryDate AS data_entrega,
-    po1.ValidationDate AS data_validacao,
-    po1.Status AS status_pedido,
-    po2.Quantity * po2.ItemUnitStorageTypeValue AS quantidade,
-    po2.UnitPrice AS preco_unitario,
-    po2.TotalPrice AS preco_total,
-    po2.ItemName AS item,
-    po3.Name AS fornecedor,
-    po4.Name AS grupo_produto,	
-    po5.Name AS subgrupo_produto,
-    po7.Code AS codigo_filial,
-    po8.Name AS familia_produto
-FROM dbo.PurchaseOrders AS po1
-LEFT JOIN dbo.PurchaseOrderDetails AS po2 ON po2.PurchaseOrderId = po1.Id
-LEFT JOIN dbo.Suppliers AS po3 ON po3.Id = po1.SupplierId
-LEFT JOIN dbo.ItemGroups AS po4 ON po4.Id = po2.ItemGroupId
-LEFT JOIN dbo.ItemSubGroups AS po5 ON po5.Id = po2.ItemSubGroupId
-LEFT JOIN dbo.SitePlaces AS po6 ON po6.Id = po1.SitePlaceId
-LEFT JOIN dbo.Sites AS po7 ON po7.Id = po6.SiteId
-LEFT JOIN dbo.ItemGroupFamilies AS po8 ON po8.Id = po4.ItemGroupFamilyId
-WHERE CAST(po1.DeliveryDate AS Date) > '2025-09-30' 
-  AND po1.Status <> 3;
+    pc.numero_pedido,
+    pc.data_entrega,
+    pc.data_validacao,
+    pc.status AS status_pedido,
+    det_pc.quantidade * det_pc.fator_unidade_armazenamento AS quantidade,
+    det_pc.preco_unitario,
+    det_pc.preco_total,
+    det_pc.nome_item AS item,
+    forn.nome AS fornecedor,
+    grp.nome AS grupo_produto,	
+    subgrp.nome AS subgrupo_produto,
+    filial.codigo AS codigo_filial,
+    familia.nome AS familia_produto
+FROM dbo.fato_ordens_compra AS pc
+LEFT JOIN dbo.fato_detalhes_ordens_compra AS det_pc ON det_pc.ordem_compra_id = pc.id
+LEFT JOIN dbo.dim_fornecedores AS forn ON forn.id = pc.fornecedor_id
+LEFT JOIN dbo.dim_grupos_produtos AS grp ON grp.id = det_pc.grupo_produto_id
+LEFT JOIN dbo.dim_subgrupos_produtos AS subgrp ON subgrp.id = det_pc.subgrupo_produto_id
+LEFT JOIN dbo.dim_locais_armazenagem AS local_armazenagem ON local_armazenagem.id = pc.local_armazenagem_id
+LEFT JOIN dbo.dim_filiais AS filial ON filial.id = local_armazenagem.filial_id
+LEFT JOIN dbo.dim_familia_grupos AS familia ON familia.id = grp.familia_id
+WHERE CAST(pc.data_entrega AS Date) > '2025-09-30' 
+  AND pc.status <> 3;
