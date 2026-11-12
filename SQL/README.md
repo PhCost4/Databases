@@ -13,9 +13,14 @@ Repositório de consultas SQL otimizadas e modeladas para extração, transforma
 ```
 SQL/
 ├── Queries/
-│   ├── Consulta_Estoque.sql     → Posição diária (day by day) e histórico móvel de estoque
-│   └── Consulta_Inventario.sql  → Auditoria de inventário geral, contagens físicas vs. teóricas e validades
-└── README.md                    → Documentação viva das consultas e regras de negócio
+│   ├── Consulta_Claims.sql              → Abertura de reclamações e não-conformidades de fornecedores
+│   ├── Consulta_Estoque.sql             → Posição diária (day by day) e histórico móvel de estoque
+│   ├── Consulta_Inventario.sql          → Auditoria de inventário geral, contagens físicas vs. teóricas e validades
+│   ├── Consulta_Ordem_Compras.sql       → Monitoramento de aberturas e status de ordens de compra (PO)
+│   ├── Consulta_Planejamento.sql        → Planejamento de consumo e ordens de suprimento (Needs)
+│   ├── Consulta_Recebimento_Notas.sql   → Conferência e recebimento de notas fiscais (RN)
+│   └── Consulta_Saidas.sql              → Consumo, transferências internas e saídas entre departamentos (OF)
+└── README.md                            → Documentação viva das consultas e regras de negócio
 ```
 
 ## Como utilizar
@@ -37,7 +42,20 @@ SQL/
 * **Histórico de Movimentação (Janela Móvel):** Rastreia a evolução de saldos e quantidades de produção com filtro dinâmico cobrindo o período do mês anterior até a data atual (`GETDATE()`).
 
 ### 2. Inventário Geral (`SQL/Queries/Consulta_Inventario.sql`)
-* **Auditoria de Inventário e Valuation:** Consolida o cruzamento de contagens físicas e teóricas em filiais e locais estratégicos (ex: aeroportos e lounges), aplicando regras condicionais específicas de preço médio por filial (`CASE WHEN`).
-* **Controle de Validades:** Integração com datas mínimas de validade (`MIN(val.data_validade)`) para monitoramento de vencimento de lotes e cálculo do valor total teórico versus físico.
+* **Auditoria de Inventário e Valuation:** Consolida o cruzamento de contagens físicas e teóricas em filiais e locais estratégicos, aplicando regras condicionais específicas de preço médio por filial (`CASE WHEN`).
+* **Controle de Validades:** Integração com datas mínimas de validade (`MIN`) para monitoramento de vencimento de lotes e cálculo do valor total teórico versus físico.
 
-*(Novas consultas de outros domínios serão documentadas nesta seção conforme forem adicionadas).*
+### 3. Gestão de Fornecedores (`SQL/Queries/Consulta_Claims.sql`)
+* **Abertura de Reclamações e Não-Conformidades:** Rastreia divergências no recebimento, quebras de qualidade, prazos de validade e penalidades aplicadas, traduzindo códigos numéricos de ocorrência (`CASE WHEN`) para classificações legíveis de negócio.
+
+### 4. Planejamento de Consumo (`SQL/Queries/Consulta_Planejamento.sql`)
+* **Ordens de Suprimento (Needs):** Acompanha o planejamento de consumo da operação, consolidando quantidades convertidas na unidade de armazenagem, preços unitários e custos totais por filial e fornecedor.
+
+### 5. Compras e Aquisições (`SQL/Queries/Consulta_Ordem_Compras.sql`)
+* **Ordens de Compra (PO):** Monitora o ciclo de compras ativas, volumes solicitados, preços unitários e valores consolidados por grupo de produtos e filial, filtrando pedidos cancelados ou inativos.
+
+### 6. Recebimento Fiscal e Qualidade (`SQL/Queries/Consulta_Recebimento_Notas.sql`)
+* **Recebimento de Notas (RN):** Registra a entrada física e fiscal de mercadorias, contemplando aferições de temperatura (manual e via Bluetooth), conversões de embalagem e validação de valores faturados.
+
+### 7. Operações e Saídas Internas (`SQL/Queries/Consulta_Saidas.sql`)
+* **Consumo Departamental e Transferências (OF):** Controla a movimentação de saída entre locais de origem e destino, rastreando o consumo interno entre departamentos e registros de perdas operacionais.
